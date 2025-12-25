@@ -17,6 +17,9 @@ jobs:
          port: 22
          timeout: 30s
          script: |
-           # 在这里写入需要在服务器上执行的命令
            cd /home/ubuntu/my-website
-           git pull origin main
+           # 请确保这是你创建的真实路径
+           # 首次部署：克隆仓库到当前目录（末尾的点 . 很重要！）
+           git clone https://github.com/bai-bo1989/zzy-blog.git .
+           # 后续可以添加你的构建、重启等命令
+           # npm install && npm run build
