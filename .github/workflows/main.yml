@@ -22,15 +22,17 @@ jobs:
         run: |
           npm ci
           npm run build
-
-      # 4. 将构建产物上传到服务器 (新增的关键步骤)
-      - name: Upload build files via SCP
-        uses: appleboy/scp-action@v0.1.7
+      # 关键步骤1（优化版）：使用 rsync 高效同步文件到服务器
+      - name: 🚀 Rsync files to Server
+        uses: burnett01/rsync-deployments@7.1.0
         with:
-          host: ${{ secrets.BUCKET }}          # 建议将Secret名从 BUCKET 改为 HOST
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.TENCENT_SECRET_KEY }} # 建议Secret名更明确，存放SSH私钥
-          port: 22
+          # 连接参数
+          switches: -avz --delete --exclude='.git/' # 关键参数，见下方解释
+          path: ./build/                      # 本地要同步的目录
+          remote_path: /home/ubuntu/my-website/ # 服务器目标目录
+          remote_host: ${{ secrets.BUCKET }}    # 服务器 IP
+          remote_user: ${{ secrets.USERNAME }} # 登录用户
+          remote_key: ${{ secrets.TENCENT_SECRET_KEY }} # SSH 私钥
           source: './build/*'                 # 上传构建产物
           target: '/home/ubuntu/my-website/'  # 服务器目标目录
 
