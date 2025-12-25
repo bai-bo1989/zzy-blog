@@ -13,7 +13,7 @@ jobs:
         with:
          host: ${{ secrets.BUCKET }}
          username: ${{ secrets.USERNAME }}
-         password: ${{ secrets.PASSWORD }} # 使用 password 参数
+         key: ${{ secrets.TENCENT_SECRET_KEY }} # 使用 password 参数
          port: 22
          timeout: 30s
          script: |
