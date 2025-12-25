@@ -43,10 +43,14 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: 22
           script: |
+            # 进入目录
             cd /home/ubuntu/my-website
-            # 这里不需要再构建！只需处理部署后的操作，例如：
-            # 1. 如果使用Nginx，将build内容复制到Web根目录
-            # sudo cp -r build/* /var/www/html/
-            # 2. 重启Nginx
-            # sudo systemctl restart nginx
-            echo "部署完成！"
+            # --- 新增的权限修正命令 ---
+            # 确保所有文件和目录的组为 www-data
+            sudo chown -R :www-data .
+            # 确保目录可被组内成员写入，并设置 setgid
+            sudo find . -type d -exec chmod 2775 {} \;
+            # 确保文件可被组内成员读取
+            sudo find . -type f -exec chmod 664 {} \;
+            # --- 结束新增 ---
+            echo "✅ 部署完成，权限已自动修正。"
