@@ -6,8 +6,21 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v4
+        # ========== 新增或确保以下步骤存在 ==========
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18' # 请将此版本号修改为你项目实际需要的Node.js版本，例如 '20', 'lts/*' 等
+          cache: 'npm' # 可选但推荐：缓存npm依赖，加速后续构建
+        # ========================================
+
+      - name: Install and Build
+        run: |
+          npm ci         # 使用 npm ci 进行更干净、更快的依赖安装（适用于 CI 环境）
+          npm run build  # 执行 Docusaurus 的构建命令
+          
       - name: Deploy to Server
         uses: appleboy/ssh-action@master
         with:
