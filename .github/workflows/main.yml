@@ -1,34 +1,52 @@
 name: Deploy to Tencent Cloud
 on:
   push:
-    branches: [ main ] # 当代码推送到main分支时触发
+    branches: [ main ]
 jobs:
-  build:
-    runs-on: Ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [20.x]
+  build-and-deploy:
+    runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Use Node.js ${ { matrix.node-version } }
-        uses: actions/setup-node@v1
+      # 1. 拉取代码
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. 设置Node.js环境 (关键步骤，语法已修正)
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
-      - run: npm install
-      - run: npm run build --if-present
-      
-      - name: Deploy to Server
+          node-version: '20.x'
+          cache: 'npm'
+
+      # 3. 安装依赖并构建 (在CI环境一次性完成)
+      - name: Install and Build
+        run: |
+          npm ci
+          npm run build
+
+      # 4. 将构建产物上传到服务器 (新增的关键步骤)
+      - name: Upload build files via SCP
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.BUCKET }}          # 建议将Secret名从 BUCKET 改为 HOST
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.TENCENT_SECRET_KEY }} # 建议Secret名更明确，存放SSH私钥
+          port: 22
+          source: './build/*'                 # 上传构建产物
+          target: '/home/ubuntu/my-website/'  # 服务器目标目录
+
+      # 5. 在服务器上执行必要命令 (如重启Web服务)
+      - name: Restart Web Service
         uses: appleboy/ssh-action@master
         with:
-         host: ${{ secrets.BUCKET }}
-         username: ${{ secrets.USERNAME }}
-         key: ${{ secrets.TENCENT_SECRET_KEY }} # 使用 password 参数
-         port: 22
-         timeout: 30s
-         script: |
-           cd /home/ubuntu/my-website
-           # 请确保这是你创建的真实路径
-           # 首次部署：克隆仓库到当前目录（末尾的点 . 很重要！）
-           # git clone https://github.com/bai-bo1989/zzy-blog.git .
-           # 后续可以添加你的构建、重启等命令
-           npm install && npm run build
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          script: |
+            cd /home/ubuntu/my-website
+            # 这里不需要再构建！只需处理部署后的操作，例如：
+            # 1. 如果使用Nginx，将build内容复制到Web根目录
+            # sudo cp -r build/* /var/www/html/
+            # 2. 重启Nginx
+            # sudo systemctl restart nginx
+            echo "部署完成！"
