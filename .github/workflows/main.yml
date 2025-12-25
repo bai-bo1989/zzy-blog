@@ -12,8 +12,8 @@ jobs:
         uses: appleboy/ssh-action@master
         with:
          host: ${{ secrets.BUCKET }}
-         username: ${{ secrets.TENCENT_SECRET_ID }}
-         password: ${{ secrets.TENCENT_SECRET_KEY }} # 使用 password 参数
+         username: ${{ secrets.USERNAME }}
+         password: ${{ secrets.PASSWORD }} # 使用 password 参数
          port: 22
          timeout: 30s
          script: |
