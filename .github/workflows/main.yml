@@ -8,14 +8,15 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Deploy via SSH
+      - name: Deploy to Server
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.BUCKET }} # 你的服务器IP
-          user: ${{ secrets.TENCENT_SECRET_ID }} # 登录用户名
-          pass: ${{ secrets.TENCENT_SECRET_KEY }} # 登录密码
-          connect_timeout: 10s
-          first_ssh: |
-            cd /your/project/path # 进入服务器上的项目目录
-            git pull origin main # 拉取最新代码
-            # 这里可以加入构建命令，如 npm run build
+         host: ${{ secrets.BUCKET }}
+         username: ${{ secrets.TENCENT_SECRET_ID }}
+         password: ${{ secrets.TENCENT_SECRET_KEY }} # 使用 password 参数
+         port: 22
+         timeout: 30s
+         script: |
+           # 在这里写入需要在服务器上执行的命令
+           cd /your/project/path
+           git pull origin main
