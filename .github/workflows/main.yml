@@ -23,7 +23,7 @@ jobs:
           npm ci
           npm run build
       # 关键步骤1（优化版）：使用 rsync 高效同步文件到服务器
-      - name: 🚀 Rsync files to Server
+      - name: Rsync files to Server
         uses: burnett01/rsync-deployments@7.1.0
         with:
           # 连接参数
@@ -33,8 +33,6 @@ jobs:
           remote_host: ${{ secrets.BUCKET }}    # 服务器 IP
           remote_user: ${{ secrets.USERNAME }} # 登录用户
           remote_key: ${{ secrets.TENCENT_SECRET_KEY }} # SSH 私钥
-          source: './build/*'                 # 上传构建产物
-          target: '/home/ubuntu/my-website/'  # 服务器目标目录
 
       # 5. 在服务器上执行必要命令 (如重启Web服务)
       - name: Restart Web Service
